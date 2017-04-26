@@ -1,0 +1,17 @@
+#!/bin/bash
+
+if [ "$1" == "" ] || [ "$2" == "" ] || [ "$3" == "" ] || [ "$4" == "" ] || [ "$5" == "" ] || [ "$6" == "" ]; then
+	echo "Error parameter: ./run ip-address port-gst port-motor width height name-robot"
+	exit
+fi 
+
+#kill all
+sudo killall raspivid
+sudo killall gst-launch-1.0
+sudo killall motortcp2
+
+#stream camera module
+raspivid -t 0 --vflip -w $4 -h $5 -fps 25 -hf -b 2000000 -o - | gst-launch-1.0 -v fdsrc ! h264parse ! rtph264pay config-interval=1 pt=96 ! gdppay ! tcpserversink host=$1 port=$2 &
+
+#demon motor and sensor
+sudo ./bin/robots $3 $6
