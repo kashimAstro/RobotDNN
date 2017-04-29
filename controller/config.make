@@ -8,7 +8,7 @@
 #   The location of your root openFrameworks installation
 #       (default) OF_ROOT = ../../.. 
 ################################################################################
-# OF_ROOT = ../../..
+OF_ROOT = ../../../..
 
 ################################################################################
 # PROJECT ROOT
@@ -77,7 +77,6 @@ PROJECT_EXTERNAL_SOURCE_PATHS=libs/dlib/all/
 # incorporated directly into the final executable application binary.
 ################################################################################
 #PROJECT_LDFLAGS=-Wl,-rpath=./libs
-#PROJECT_CFLAGS+= `pkg-config --libs opencv`
 
 ################################################################################
 # PROJECT DEFINES
@@ -105,7 +104,8 @@ PROJECT_EXTERNAL_SOURCE_PATHS=libs/dlib/all/
 #
 #   Note: Leave a leading space when adding list items with the += operator
 ################################################################################
-#PROJECT_LDFLAGS +=-DLIB_NO_GUI_SUPPORT
+PROJECT_CFLAGS +=-lblas -llapack
+PROJECT_LDFLAGS +=-DDLIB_USE_BLAS -DDLIB_USE_LAPACK
 
 ################################################################################
 # PROJECT OPTIMIZATION CFLAGS
