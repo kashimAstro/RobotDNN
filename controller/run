@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ "$1" == "" ]; then
-	echo "Error parameter: ./run 'ip-address,gst-port,motor-port' 'robot002.lan,5555,11999' ..."
+	echo "Error parameter: ./run 'ip-address,gst-port,motor-port,gst-width,gst-height' 'robot002.lan,5555,11999,320,240' ..."
 	exit
 fi
 ./bin/controller $@ 
