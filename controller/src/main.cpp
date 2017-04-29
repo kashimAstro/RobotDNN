@@ -13,10 +13,10 @@ class RTSPFace : public ofBaseApp
 {
     public:
 	UIController ctrl;
-	std::vector<ofTexture> tex;
 	std::vector<std::shared_ptr<FaceDetect>> face;
 	std::vector<std::shared_ptr<FaceRecognition>> face_rec;
 	std::vector<std::shared_ptr<ImageNet>> image_predict;
+	std::vector<ofRectangle> ui_robot_select;
 
 	string TRUST_PERSON;
 	ofFbo stage;
@@ -26,7 +26,8 @@ class RTSPFace : public ofBaseApp
 	std::vector<string> argument;
 	std::vector<string> path_photo;
 
-        int w,h,indexconnection;
+        std::vector<int> _w,_h;
+	int indexconnection;
 	bool connected;
 	string ip;
 	string port;
@@ -59,9 +60,9 @@ class RTSPFace : public ofBaseApp
 			{
 				ofLog()<<argument[i];
 				std::vector<string> split = ofSplitString(argument[i],",");
-				ip         += split[0]+",";
+				/*ip         += split[0]+",";
 				port       += split[1]+",";
-				port_rotor += split[2]+",";
+				port_rotor += split[2]+",";*/
 				path_photo.push_back( split[0] );
 				ofDirectory dir(split[0]);
 				if(!dir.exists()){
@@ -73,9 +74,8 @@ class RTSPFace : public ofBaseApp
 		{
 			string str = "robot001.lan,5555,11999";
 			path_photo.push_back( "robot001.lan" );
-
 			argument.push_back(str);
-			std::vector<string> split = ofSplitString(str,",");
+			//std::vector<string> split = ofSplitString(str,",");
 		}
 	}
 
@@ -87,7 +87,6 @@ class RTSPFace : public ofBaseApp
 			endT   = (int)TIME_SAVE_IMAGE_MILLIS;
 
 			gst.clear();
-			tex.clear();
 			tcpClient.clear();
 			
 			std::shared_ptr<FaceDetect>      zface  = std::shared_ptr<FaceDetect>(new FaceDetect);
@@ -104,12 +103,13 @@ class RTSPFace : public ofBaseApp
 			      string _ip         = split[0];
 			      string _port       = split[1];
 			      string _port_rotor = split[2];
+			      _w.push_back(ofToInt(split[3]));
+			      _h.push_back(ofToInt(split[4]));
+
 			      ofLog()<<"address:"<<_ip<<" port:"<<_port<<" port-motor-sensor:"<<_port_rotor;
-			      ofTexture t;
-		              t.allocate(w,h,GL_RGB);
-                	      tex.push_back(t);
 			      std::shared_ptr<ofGstVideoUtils> g = std::shared_ptr<ofGstVideoUtils>(new ofGstVideoUtils);
-		              g->setPipeline("tcpclientsrc host="+_ip+" port="+_port+" ! gdpdepay ! rtph264depay ! avdec_h264 ! videoconvert",OF_PIXELS_RGB,true,w,h);
+		              g->setPipeline("tcpclientsrc host="+_ip+" port="+_port+" ! gdpdepay ! rtph264depay ! avdec_h264 ! videoconvert",
+					     OF_PIXELS_RGB,true,ofToInt(split[3]),ofToInt(split[4]));
 		              g->startPipeline();
                 	      g->play();
                               gst.push_back(g);
@@ -126,8 +126,8 @@ class RTSPFace : public ofBaseApp
 			ctrl.setHoverButton(ofColor::grey, ofColor::red);
 
 			connected = true;
-			string msg = "3,1,0";
-			ctrl.sendUpDown(msg);
+			//string msg = "3,1,0";
+			//ctrl.sendUpDown(msg);
 		}
 		else
 		{
@@ -143,7 +143,7 @@ class RTSPFace : public ofBaseApp
 
 	void connects(bool & b)   { connect(b); }
 	void speedmotor(int & v)  { ctrl.setSpeed(v); }
-	void selectrobot(int & v) { indexconnection = (int) v; ctrl.exit(); ctrl.setup(tcpClient[indexconnection],ofVec2f(ofGetWidth()-200,20),"asset1",30);	}
+	void selectrobot(int & v) { indexconnection = (int) v; ctrl.exit(); ctrl.setup(tcpClient[indexconnection],ofVec2f(ofGetWidth()-200,20),"asset1",30); }
 	void imagenet(bool & b)   { image_predict[indexconnection]->startThread(true); }
 
         void setup() 
@@ -158,12 +158,17 @@ class RTSPFace : public ofBaseApp
 		gui.add(robot_num.set("change robot",0,0,argument.size()));
 		gui.setPosition(ofGetWidth()-(gui.getWidth()+10),ofGetHeight()-(gui.getHeight()+10));
 
+		/*for(int i = 0; i < argument.size(); i++)
+		{
+			ui_robot_select.push_back(ofRectangle());
+		}*/
+		
 		enable_connect.addListener(this,&RTSPFace::connects);
 		enable_predict.addListener(this,&RTSPFace::imagenet);
 		speed_motor.addListener(this,&RTSPFace::speedmotor);
 		robot_num.addListener(this,&RTSPFace::selectrobot);
 
-		w=320,h=240;
+		//w=320,h=240;
 
 		/* compare face recognition */
 		TRUST_PERSON="dario.jpg";
@@ -218,7 +223,7 @@ class RTSPFace : public ofBaseApp
 				if(enable_faces) 
 				{
 					face[i]->find(gst[i]->getPixels());
-					face[i]->draw(i*(imager.getWidth()),h);
+					face[i]->draw(i*(imager.getWidth()),_h[i]);
 				}
 			}
 		
@@ -263,7 +268,7 @@ class RTSPFace : public ofBaseApp
 				std::vector<string> pre = image_predict[indexconnection]->getPredict(imager.getPixels());
 				for(int d = 0; d < pre.size(); d++)
 				{
-					ofDrawBitmapStringHighlight(pre[d],2,(h+150)+(d*24),ofColor::orange,ofColor::black);
+					ofDrawBitmapStringHighlight(pre[d],2,(_h[indexconnection]+150)+(d*24),ofColor::orange,ofColor::black);
 				}
 			}
 
