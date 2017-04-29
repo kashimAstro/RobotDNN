@@ -42,6 +42,8 @@ class UIController
 		roundbox.push_back(ofRectangle((ofGetWidth()/2)-150,(ofGetHeight()/2)-150,100,100));
 		roundbox.push_back(ofRectangle((ofGetWidth()/2)+150,(ofGetHeight()/2)-150,100,100));
 
+		//if(joy.isThreadRunning())
+		//	joy.exit();
 		joy.setup("/dev/input/js0");
                 if (!joy.isFound())
                     ofLog()<<"Joystick open Failed!";

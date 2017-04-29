@@ -143,7 +143,7 @@ class RTSPFace : public ofBaseApp
 
 	void connects(bool & b)   { connect(b); }
 	void speedmotor(int & v)  { ctrl.setSpeed(v); }
-	void selectrobot(int & v) { indexconnection = (int) v; ctrl.setup(tcpClient[indexconnection],ofVec2f(ofGetWidth()-200,20),"asset1",30);	}
+	void selectrobot(int & v) { indexconnection = (int) v; ctrl.exit(); ctrl.setup(tcpClient[indexconnection],ofVec2f(ofGetWidth()-200,20),"asset1",30);	}
 	void imagenet(bool & b)   { image_predict[indexconnection]->startThread(true); }
 
         void setup() 
@@ -175,6 +175,7 @@ class RTSPFace : public ofBaseApp
 
         void update()
 	{
+		ofSetWindowTitle(ofToString(ofGetFrameRate()));
 		if(connected)
 		{
 			/* joystick control enable */
@@ -216,11 +217,8 @@ class RTSPFace : public ofBaseApp
 				/* face detect */
 				if(enable_faces) 
 				{
-					//if(gst[i]->isFrameNew() && gst[i]->isPlaying()) 
-					//{
 					face[i]->find(gst[i]->getPixels());
 					face[i]->draw(i*(imager.getWidth()),h);
-					//}
 				}
 			}
 		
@@ -294,6 +292,17 @@ class RTSPFace : public ofBaseApp
 	                        path_photo[indexconnection]+"/"+ofGetTimestampString()+".jpg",
         	                OF_IMAGE_QUALITY_BEST
 			);
+		}
+	}
+
+	void windowResized(int w, int h)
+	{
+		if(connected)
+		{
+			ctrl.exit();
+			ctrl.setup(tcpClient[indexconnection],ofVec2f(w-200,20),"asset1",30);
+			ctrl.setHoverButton(ofColor::orange, ofColor::blue);
+			gui.setPosition(w-(gui.getWidth()+10),h-(gui.getHeight()+10));
 		}
 	}
 
