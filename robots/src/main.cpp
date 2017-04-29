@@ -57,8 +57,23 @@ class MotorStepper : public ofBaseApp
 		        TCP.setMessageDelimiter("\n");
 			//comp.setup(&TCP);
 	                //gps.setup(&TCP,"/dev/ttyAMA0",9600);
-			
-			string pinRight[4] = {"4","17","27","22"};
+			ofFile config_pin_motor("config_pi_motor.txt", ofFile::ReadOnly, false);
+			if(!config_pin_motor.exists())
+			{
+				ofLog()<<"configure motor pin file: bin/data/config_pi_motor.txt";
+			}
+			string conf_buff = config_pin_motor.readToBuffer().getText();
+			vector<string> numsp = ofSplitString(conf_buff,"\n");
+			vector<string> pins_right = ofSplitString(numsp[0],":");
+			vector<string> pins_left  = ofSplitString(numsp[1],":");
+
+                        vector<string> pins_list_right = ofSplitString(pins_right[1],",");
+                        vector<string> pins_list_left  = ofSplitString(pins_left[1],",");
+			ofLog()<<"Right::"<<pins_list_right[0]<<" "<<pins_list_right[1]<<" "<<pins_list_right[2]<<" "<<pins_list_right[3];
+			ofLog()<<"Left::"<<pins_list_left[0]<<" "<<pins_list_left[1]<<" "<<pins_list_left[2]<<" "<<pins_list_left[3];
+
+			//string pinRight[4] = {"4","17","27","22"};
+			string pinRight[4] = {pins_list_right[0], pins_list_right[1], pins_list_right[2], pins_list_right[3]};
 			for( unsigned int i = 0; i < 4; i++ )
 			{
 	    			gpioRight[i].setup(pinRight[i]);
@@ -66,7 +81,8 @@ class MotorStepper : public ofBaseApp
 	                        gpioRight[i].setdir_gpio("out");
 			}
 
-			string pinLeft[4] = {"6","13","19","26"};
+			//string pinLeft[4] = {"6","13","19","26"};
+			string pinLeft[4] = {pins_list_left[0], pins_list_left[1], pins_list_left[2], pins_list_left[3]};
 			for( unsigned int i = 0; i < 4; i++ )
 			{
     				gpioLeft[i].setup(pinLeft[i]);
